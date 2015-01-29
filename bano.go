@@ -16,22 +16,22 @@ import (
 
 func main() {
 	dir := flag.String("dir", "", "directory")
-	outpuFile := flag.String("out", "", "output file")
+	outputFile := flag.String("out", "", "output file")
 	flag.Parse()
 	if *dir == "" {
 		fmt.Printf("Directory is mandatory\n")
 	}
-	if *outpuFile == "" {
+	if *outputFile == "" {
 		fmt.Printf("Output file is mandatory\n")
 	}
-	if *dir == "" || *outpuFile == "" {
+	if *dir == "" || *outputFile == "" {
 		fmt.Printf("\nExecute help: bano -help\n")
 		return
 	}
 	mi := core.NewMemindex()
 	bano := NewBano(mi)
 	bano.IndexDir(*dir)
-	mi.SaveInFile(*outpuFile)
+	mi.SaveInFile(*outputFile)
 }
 
 type Bano struct {
