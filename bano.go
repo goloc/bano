@@ -14,8 +14,6 @@ import (
 	"strings"
 )
 
-type add func(street *core.Street)
-
 func main() {
 	dir := flag.String("dir", "", "directory")
 	outpuFile := flag.String("out", "", "output file")
@@ -30,12 +28,17 @@ func main() {
 		fmt.Printf("\nExecute help: bano -help\n")
 		return
 	}
-	memindex := core.NewMemindex()
-	indexDir(*dir, memindex)
-	memindex.SaveInFile(*outpuFile)
+	mi := core.NewMemindex()
+	bano := NewBano(mi)
+	bano.IndexDir(*dir)
+	mi.SaveInFile(*outpuFile)
 }
 
-func indexDir(dirname string, index core.Index) {
+type Bano struct {
+	core.Index
+}
+
+func (b *Bano) IndexDir(dirname string) {
 	infos, err := ioutil.ReadDir(dirname)
 	if err != nil {
 		return
@@ -44,12 +47,12 @@ func indexDir(dirname string, index core.Index) {
 		name := info.Name()
 		if strings.HasSuffix(name, ".csv") {
 			fmt.Printf(name + "\n")
-			indexFile(dirname+"/"+name, index)
+			b.IndexFile(dirname + "/" + name)
 		}
 	}
 }
 
-func indexFile(filename string, index core.Index) {
+func (b *Bano) IndexFile(filename string) {
 	i := 0
 	file, err := os.Open(filename)
 	if err != nil {
@@ -126,7 +129,7 @@ func indexFile(filename string, index core.Index) {
 						}
 						currentAddresses = nil
 					}
-					index.Add(lastStreet)
+					b.Add(lastStreet)
 				}
 				lastStreet = core.NewStreet()
 				lastStreet.Id = streetId
@@ -153,7 +156,13 @@ func indexFile(filename string, index core.Index) {
 		}
 	}
 	if lastStreet != nil {
-		index.Add(lastStreet)
+		b.Add(lastStreet)
 	}
 	fmt.Printf("+]\n")
+}
+
+func NewBano(index core.Index) *Bano {
+	b := new(Bano)
+	b.Index = index
+	return b
 }
