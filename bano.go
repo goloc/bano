@@ -1,7 +1,7 @@
 package main
 
 import (
-	"container/list"
+	//"container/list"
 	"encoding/csv"
 	"flag"
 	"fmt"
@@ -53,7 +53,15 @@ func (b *Bano) IndexDir(dirname string) {
 }
 
 func (b *Bano) IndexFile(filename string) {
-	i := 0
+	var loc core.Localisation
+	var street *core.Street
+	var zone *core.Zone
+	var address *core.Address
+	var addressId, num, streetName, postcode, city, lat, lon, streetId, zoneId string
+	var floatLat, floatLon float64
+	var records []string
+	var i int
+
 	file, err := os.Open(filename)
 	if err != nil {
 		return
@@ -65,100 +73,74 @@ func (b *Bano) IndexFile(filename string) {
 	reader := csv.NewReader(file)
 	reader.TrailingComma = true
 
-	var lastZoneId string
-	var lastZone *core.Zone
-	var lastStreetId string
-	var lastStreet *core.Street
-	var currentAddresses *list.List
-
 	for {
-		records, err := reader.Read()
+		records, err = reader.Read()
 
 		if err == io.EOF {
 			break
 		} else if err != nil {
+			continue
+		}
+
+		addressId = records[0]
+		num = records[1]
+		streetName = records[2]
+		postcode = records[3]
+		city = records[4]
+		lat = records[6]
+		lon = records[7]
+		streetId = addressId[:10]
+		zoneId = addressId[:5]
+
+		loc = b.Get(zoneId)
+		if loc == nil {
+			zone = core.NewZone()
+			zone.Id = zoneId
+			zone.Postcode = postcode
+			zone.City = city
+			b.Add(zone)
 		} else {
-			addressId := records[0]
-			num := records[1]
-			streetName := records[2]
-			postcode := records[3]
-			city := records[4]
-			lat := records[6]
-			lon := records[7]
-			streetId := strings.Split(addressId, "-")[0]
-			zoneId := addressId[0:5]
+			zone = loc.(*core.Zone)
+		}
 
-			if lastZoneId == zoneId {
-
-			} else {
-				if lastZone != nil {
-					// TODO
-				}
-				lastZone = core.NewZone()
-				lastZone.Id = zoneId
-				lastZone.Postcode = postcode
-				lastZone.City = city
+		loc = b.Get(streetId)
+		if loc == nil {
+			street = core.NewStreet()
+			street.Id = streetId
+			street.StreetName = streetName
+			street.Zone = zone
+			floatLat, err = strconv.ParseFloat(lat, 64)
+			if err == nil {
+				street.Lat = floatLat
 			}
-
-			if lastStreetId == streetId {
-				address := core.NewAddress()
-				address.Num = num
-				point := new(core.Point)
-				floatLat, ok := strconv.ParseFloat(lat, 64)
-				if ok == nil {
-					point.Lat = floatLat
-				}
-				floatLon, ok := strconv.ParseFloat(lon, 64)
-				if ok == nil {
-					point.Lon = floatLon
-				}
-				address.Point = point
-				if currentAddresses == nil {
-					currentAddresses = list.New()
-				}
-				currentAddresses.PushBack(address)
-			} else {
-				if lastStreet != nil {
-					if currentAddresses != nil {
-						lastStreet.Addresses = make([]*core.Address, currentAddresses.Len())
-						i := 0
-						for e := currentAddresses.Front(); e != nil; e = e.Next() {
-							address := e.Value.(*core.Address)
-							lastStreet.Addresses[i] = address
-							i++
-						}
-						currentAddresses = nil
-					}
-					b.Add(lastStreet)
-				}
-				lastStreet = core.NewStreet()
-				lastStreet.Id = streetId
-				lastStreet.StreetName = streetName
-				lastStreet.Zone = lastZone
-				point := new(core.Point)
-				floatLat, ok := strconv.ParseFloat(lat, 64)
-				if ok == nil {
-					point.Lat = floatLat
-				}
-				floatLon, ok := strconv.ParseFloat(lon, 64)
-				if ok == nil {
-					point.Lon = floatLon
-				}
-				lastStreet.Point = point
+			floatLon, err = strconv.ParseFloat(lon, 64)
+			if err == nil {
+				street.Lon = floatLon
 			}
+			b.Add(street)
+		} else {
+			street = loc.(*core.Street)
+		}
 
-			lastStreetId = streetId
+		address = core.NewAddress()
+		address.Num = num
+		floatLat, err = strconv.ParseFloat(lat, 64)
+		if err == nil {
+			address.Lat = floatLat
+		}
+		floatLon, err = strconv.ParseFloat(lon, 64)
+		if err == nil {
+			address.Lon = floatLon
+		}
 
-			i++
-			if math.Mod(float64(i), 100000) == 0 {
-				fmt.Printf("+")
-			}
+		// street.LinkedAddress = core.NewLinkedElement(address, street.LinkedAddress)
+
+		i++
+		if math.Mod(float64(i), 20000) == 0 {
+			fmt.Printf("+")
 		}
 	}
-	if lastStreet != nil {
-		b.Add(lastStreet)
-	}
-	fmt.Printf("+]\n")
+	fmt.Printf("]\n")
 }
 
 func NewBano(index core.Index) *Bano {

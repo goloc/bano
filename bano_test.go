@@ -11,12 +11,12 @@ func TestImport(t *testing.T) {
 	bano.IndexDir(".")
 
 	sizeLoc := bano.SizeLocalisation()
-	if sizeLoc != 3572 {
+	if sizeLoc != 21734 {
 		t.Fail()
 	}
 
 	sizeIndex := bano.SizeIndex()
-	if sizeIndex != 900 {
+	if sizeIndex != 9356 {
 		t.Fail()
 	}
 
@@ -27,12 +27,12 @@ func TestReload(t *testing.T) {
 	memindex := core.NewMemindexFromFile("golocTest.gob")
 
 	sizeLoc := memindex.SizeLocalisation()
-	if sizeLoc != 3572 {
+	if sizeLoc != 21734 {
 		t.Fail()
 	}
 
 	sizeIndex := memindex.SizeIndex()
-	if sizeIndex != 900 {
+	if sizeIndex != 9356 {
 		t.Fail()
 	}
 }
