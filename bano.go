@@ -5,7 +5,7 @@ import (
 	"encoding/csv"
 	"flag"
 	"fmt"
-	core "github.com/goloc/core"
+	core "github.com/goloc/goloc-core"
 	"io"
 	"io/ioutil"
 	"math"

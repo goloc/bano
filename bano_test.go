@@ -1,7 +1,7 @@
 package main
 
 import (
-	core "github.com/goloc/core"
+	core "github.com/goloc/goloc-core"
 	"testing"
 )
 
