@@ -1,12 +1,12 @@
 package main
 
 import (
-	core "github.com/goloc/goloc-core"
+	"github.com/goloc/goloc"
 	"testing"
 )
 
 func TestImport(t *testing.T) {
-	mi := core.NewMemindex()
+	mi := goloc.NewMemindex()
 	bano := NewBano(mi)
 	bano.IndexDir(".")
 
@@ -24,7 +24,7 @@ func TestImport(t *testing.T) {
 }
 
 func TestReload(t *testing.T) {
-	memindex := core.NewMemindexFromFile("golocTest.gob")
+	memindex := goloc.NewMemindexFromFile("golocTest.gob")
 
 	sizeLoc := memindex.SizeLocalisation()
 	if sizeLoc != 21734 {

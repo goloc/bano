@@ -1,11 +1,10 @@
 package main
 
 import (
-	//"container/list"
 	"encoding/csv"
 	"flag"
 	"fmt"
-	core "github.com/goloc/goloc-core"
+	"github.com/goloc/goloc"
 	"io"
 	"io/ioutil"
 	"math"
@@ -28,14 +27,14 @@ func main() {
 		fmt.Printf("\nExecute help: bano -help\n")
 		return
 	}
-	mi := core.NewMemindex()
+	mi := goloc.NewMemindex()
 	bano := NewBano(mi)
 	bano.IndexDir(*dir)
 	mi.SaveInFile(*outputFile)
 }
 
 type Bano struct {
-	core.Index
+	goloc.Index
 }
 
 func (b *Bano) IndexDir(dirname string) {
@@ -53,10 +52,10 @@ func (b *Bano) IndexDir(dirname string) {
 }
 
 func (b *Bano) IndexFile(filename string) {
-	var loc core.Localisation
-	var street *core.Street
-	var zone *core.Zone
-	var address *core.Address
+	var loc goloc.Localisation
+	var street *goloc.Street
+	var zone *goloc.Zone
+	var address *goloc.Address
 	var addressId, num, streetName, postcode, city, lat, lon, streetId, zoneId string
 	var floatLat, floatLon float64
 	var records []string
@@ -94,18 +93,18 @@ func (b *Bano) IndexFile(filename string) {
 
 		loc = b.Get(zoneId)
 		if loc == nil {
-			zone = core.NewZone()
+			zone = goloc.NewZone()
 			zone.Id = zoneId
 			zone.Postcode = postcode
 			zone.City = city
 			b.Add(zone)
 		} else {
-			zone = loc.(*core.Zone)
+			zone = loc.(*goloc.Zone)
 		}
 
 		loc = b.Get(streetId)
 		if loc == nil {
-			street = core.NewStreet()
+			street = goloc.NewStreet()
 			street.Id = streetId
 			street.StreetName = streetName
 			street.Zone = zone
@@ -119,10 +118,10 @@ func (b *Bano) IndexFile(filename string) {
 			}
 			b.Add(street)
 		} else {
-			street = loc.(*core.Street)
+			street = loc.(*goloc.Street)
 		}
 
-		address = core.NewAddress()
+		address = goloc.NewAddress()
 		address.Num = num
 		floatLat, err = strconv.ParseFloat(lat, 64)
 		if err == nil {
@@ -143,7 +142,7 @@ func (b *Bano) IndexFile(filename string) {
 	fmt.Printf("]\n")
 }
 
-func NewBano(index core.Index) *Bano {
+func NewBano(index goloc.Index) *Bano {
 	b := new(Bano)
 	b.Index = index
 	return b
