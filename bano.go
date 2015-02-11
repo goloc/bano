@@ -55,7 +55,7 @@ func (b *Bano) IndexFile(filename string) {
 	var loc goloc.Localisation
 	var street *goloc.Street
 	var zone *goloc.Zone
-	var address *goloc.Address
+	var point *goloc.Point
 	var addressId, num, streetName, postcode, city, lat, lon, streetId, zoneId string
 	var floatLat, floatLon float64
 	var records []string
@@ -102,37 +102,29 @@ func (b *Bano) IndexFile(filename string) {
 			zone = loc.(*goloc.Zone)
 		}
 
+		point = goloc.NewPoint()
+		floatLat, err = strconv.ParseFloat(lat, 64)
+		if err == nil {
+			point.Lat = float32(floatLat)
+		}
+		floatLon, err = strconv.ParseFloat(lon, 64)
+		if err == nil {
+			point.Lon = float32(floatLon)
+		}
+
 		loc = b.Get(streetId)
 		if loc == nil {
 			street = goloc.NewStreet()
 			street.Id = streetId
 			street.StreetName = streetName
 			street.Zone = zone
-			floatLat, err = strconv.ParseFloat(lat, 64)
-			if err == nil {
-				street.Lat = floatLat
-			}
-			floatLon, err = strconv.ParseFloat(lon, 64)
-			if err == nil {
-				street.Lon = floatLon
-			}
+			street.Point = *point
 			b.Add(street)
 		} else {
 			street = loc.(*goloc.Street)
 		}
 
-		address = goloc.NewAddress()
-		address.Num = num
-		floatLat, err = strconv.ParseFloat(lat, 64)
-		if err == nil {
-			address.Lat = floatLat
-		}
-		floatLon, err = strconv.ParseFloat(lon, 64)
-		if err == nil {
-			address.Lon = floatLon
-		}
-
-		// street.LinkedAddress = core.NewLinkedElement(address, street.LinkedAddress)
+		street.Addresses[num] = *point
 
 		i++
 		if math.Mod(float64(i), 20000) == 0 {
