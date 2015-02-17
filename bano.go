@@ -34,7 +34,7 @@ func main() {
 }
 
 type Bano struct {
-	goloc.Index
+	*goloc.Memindex
 }
 
 func (b *Bano) IndexDir(dirname string) {
@@ -134,8 +134,8 @@ func (b *Bano) IndexFile(filename string) {
 	fmt.Printf("]\n")
 }
 
-func NewBano(index goloc.Index) *Bano {
+func NewBano(index *goloc.Memindex) *Bano {
 	b := new(Bano)
-	b.Index = index
+	b.Memindex = index
 	return b
 }
