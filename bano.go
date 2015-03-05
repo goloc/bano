@@ -52,10 +52,11 @@ func (b *Bano) IndexDir(dirname string) {
 }
 
 func (b *Bano) IndexFile(filename string) {
-	var loc goloc.Localisation
+	var loc goloc.Location
 	var street *goloc.Street
 	var zone *goloc.Zone
 	var point *goloc.Point
+	var streetNumberedPoint *goloc.StreetNumberedPoint
 	var addressId, num, streetName, postcode, city, lat, lon, streetId, zoneId string
 	var floatLat, floatLon float64
 	var records []string
@@ -93,8 +94,7 @@ func (b *Bano) IndexFile(filename string) {
 
 		loc = b.Get(zoneId)
 		if loc == nil {
-			zone = goloc.NewZone()
-			zone.Id = zoneId
+			zone = goloc.NewZone(zoneId)
 			zone.Postcode = postcode
 			zone.City = city
 			b.Add(zone)
@@ -114,8 +114,7 @@ func (b *Bano) IndexFile(filename string) {
 
 		loc = b.Get(streetId)
 		if loc == nil {
-			street = goloc.NewStreet()
-			street.Id = streetId
+			street = goloc.NewStreet(streetId)
 			street.StreetName = streetName
 			street.Zone = zone
 			street.Point = *point
@@ -124,7 +123,8 @@ func (b *Bano) IndexFile(filename string) {
 			street = loc.(*goloc.Street)
 		}
 
-		street.Addresses[num] = *point
+		streetNumberedPoint = goloc.NewStreetNumberedPoint(num)
+		street.NumberedPoints[num] = streetNumberedPoint
 
 		i++
 		if math.Mod(float64(i), 20000) == 0 {
