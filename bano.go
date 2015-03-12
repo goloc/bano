@@ -55,10 +55,10 @@ func (b *Bano) IndexFile(filename string) {
 	var loc goloc.Location
 	var street *goloc.Street
 	var zone *goloc.Zone
-	var point *goloc.Point
 	var streetNumberedPoint *goloc.StreetNumberedPoint
 	var addressId, num, streetName, postcode, city, lat, lon, streetId, zoneId string
-	var floatLat, floatLon float64
+	var float64Lat, float64Lon float64
+	var float32Lat, float32Lon float32
 	var records []string
 	var i int
 
@@ -92,6 +92,17 @@ func (b *Bano) IndexFile(filename string) {
 		streetId = addressId[:10]
 		zoneId = addressId[:5]
 
+		float64Lat, err = strconv.ParseFloat(lat, 64)
+		float32Lat = 0
+		if err == nil {
+			float32Lat = float32(float64Lat)
+		}
+		float64Lon, err = strconv.ParseFloat(lon, 64)
+		float32Lon = 0
+		if err == nil {
+			float32Lon = float32(float64Lon)
+		}
+
 		loc = b.Get(zoneId)
 		if loc == nil {
 			zone = goloc.NewZone(zoneId)
@@ -101,15 +112,17 @@ func (b *Bano) IndexFile(filename string) {
 		} else {
 			zone = loc.(*goloc.Zone)
 		}
-
-		point = goloc.NewPoint()
-		floatLat, err = strconv.ParseFloat(lat, 64)
-		if err == nil {
-			point.Lat = float32(floatLat)
+		if float32Lat < zone.PointMin.Lat {
+			zone.PointMin.Lat = float32Lat
 		}
-		floatLon, err = strconv.ParseFloat(lon, 64)
-		if err == nil {
-			point.Lon = float32(floatLon)
+		if float32Lat > zone.PointMax.Lat {
+			zone.PointMax.Lat = float32Lat
+		}
+		if float32Lon < zone.PointMin.Lon {
+			zone.PointMin.Lon = float32Lon
+		}
+		if float32Lon > zone.PointMax.Lon {
+			zone.PointMax.Lon = float32Lon
 		}
 
 		loc = b.Get(streetId)
@@ -117,13 +130,16 @@ func (b *Bano) IndexFile(filename string) {
 			street = goloc.NewStreet(streetId)
 			street.StreetName = streetName
 			street.Zone = zone
-			street.Point = *point
+			street.Lat = float32Lat
+			street.Lon = float32Lon
 			b.Add(street)
 		} else {
 			street = loc.(*goloc.Street)
 		}
 
 		streetNumberedPoint = goloc.NewStreetNumberedPoint(num)
+		streetNumberedPoint.Lat = float32Lat
+		streetNumberedPoint.Lon = float32Lon
 		street.NumberedPoints[num] = streetNumberedPoint
 
 		i++

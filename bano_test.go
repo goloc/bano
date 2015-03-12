@@ -16,7 +16,7 @@ func TestImport(t *testing.T) {
 	}
 
 	sizeIndex := bano.SizeIndex()
-	if sizeIndex != 9356 {
+	if sizeIndex != 7065 {
 		t.Fail()
 	}
 
@@ -32,7 +32,7 @@ func TestReload(t *testing.T) {
 	}
 
 	sizeIndex := memindex.SizeIndex()
-	if sizeIndex != 9356 {
+	if sizeIndex != 7065 {
 		t.Fail()
 	}
 }
