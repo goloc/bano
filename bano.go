@@ -34,7 +34,7 @@ func main() {
 }
 
 type Bano struct {
-	*goloc.Memindex
+	goloc.Index
 }
 
 func (b *Bano) IndexDir(dirname string) {
@@ -56,11 +56,11 @@ func (b *Bano) IndexFile(filename string) {
 	var street *goloc.Street
 	var zone *goloc.Zone
 	var streetNumberedPoint *goloc.StreetNumberedPoint
-	var addressId, num, streetName, postcode, city, lat, lon, streetId, zoneId string
 	var float64Lat, float64Lon float64
-	var float32Lat, float32Lon float32
 	var records []string
 	var i int
+
+	badPos := float32(0)
 
 	file, err := os.Open(filename)
 	if err != nil {
@@ -82,25 +82,28 @@ func (b *Bano) IndexFile(filename string) {
 			continue
 		}
 
-		addressId = records[0]
-		num = records[1]
-		streetName = records[2]
-		postcode = records[3]
-		city = records[4]
-		lat = records[6]
-		lon = records[7]
-		streetId = addressId[:10]
-		zoneId = addressId[:5]
+		addressId := records[0]
+		num := records[1]
+		streetName := records[2]
+		postcode := records[3]
+		city := records[4]
+		lat := records[6]
+		lon := records[7]
+		streetId := addressId[:10]
+		zoneId := addressId[:5]
 
 		float64Lat, err = strconv.ParseFloat(lat, 64)
-		float32Lat = 0
+		float32Lat := badPos
 		if err == nil {
 			float32Lat = float32(float64Lat)
 		}
 		float64Lon, err = strconv.ParseFloat(lon, 64)
-		float32Lon = 0
+		float32Lon := badPos
 		if err == nil {
 			float32Lon = float32(float64Lon)
+		}
+		if float32Lat == badPos && float32Lon == badPos {
+			fmt.Printf("Bad position : %v", records)
 		}
 
 		loc = b.Get(zoneId)
@@ -112,17 +115,19 @@ func (b *Bano) IndexFile(filename string) {
 		} else {
 			zone = loc.(*goloc.Zone)
 		}
-		if float32Lat < zone.PointMin.Lat {
-			zone.PointMin.Lat = float32Lat
-		}
-		if float32Lat > zone.PointMax.Lat {
-			zone.PointMax.Lat = float32Lat
-		}
-		if float32Lon < zone.PointMin.Lon {
-			zone.PointMin.Lon = float32Lon
-		}
-		if float32Lon > zone.PointMax.Lon {
-			zone.PointMax.Lon = float32Lon
+		if float32Lat != badPos || float32Lon != badPos {
+			if float32Lat < zone.PointMin.Lat || zone.PointMin.Lat == badPos {
+				zone.PointMin.Lat = float32Lat
+			}
+			if float32Lat > zone.PointMax.Lat || zone.PointMax.Lat == badPos {
+				zone.PointMax.Lat = float32Lat
+			}
+			if float32Lon < zone.PointMin.Lon || zone.PointMin.Lon == badPos {
+				zone.PointMin.Lon = float32Lon
+			}
+			if float32Lon > zone.PointMax.Lon || zone.PointMax.Lon == badPos {
+				zone.PointMax.Lon = float32Lon
+			}
 		}
 
 		loc = b.Get(streetId)
@@ -130,16 +135,20 @@ func (b *Bano) IndexFile(filename string) {
 			street = goloc.NewStreet(streetId)
 			street.StreetName = streetName
 			street.Zone = zone
-			street.Lat = float32Lat
-			street.Lon = float32Lon
+			if float32Lat != badPos || float32Lon != badPos {
+				street.Lat = float32Lat
+				street.Lon = float32Lon
+			}
 			b.Add(street)
 		} else {
 			street = loc.(*goloc.Street)
 		}
 
 		streetNumberedPoint = goloc.NewStreetNumberedPoint(num)
-		streetNumberedPoint.Lat = float32Lat
-		streetNumberedPoint.Lon = float32Lon
+		if float32Lat != badPos || float32Lon != badPos {
+			streetNumberedPoint.Lat = float32Lat
+			streetNumberedPoint.Lon = float32Lon
+		}
 		street.NumberedPoints[num] = streetNumberedPoint
 
 		i++
@@ -150,8 +159,10 @@ func (b *Bano) IndexFile(filename string) {
 	fmt.Printf("]\n")
 }
 
-func NewBano(index *goloc.Memindex) *Bano {
+func NewBano(index goloc.Index) *Bano {
 	b := new(Bano)
-	b.Memindex = index
+	b.Index = index
+	b.AddStopWord("D", "DE", "DU", "DES", "L", "LE", "LA", "LES")
+	b.AddStopWord("RUE", "ROUTE", "ALLEE", "PLACE", "CHEMIN", "IMPASSE", "AVENUE", "BOULEVARD")
 	return b
 }
