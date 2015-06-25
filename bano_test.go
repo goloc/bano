@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/goloc/goloc"
 	"testing"
+
+	"github.com/goloc/goloc"
 )
 
 func TestImport(t *testing.T) {
@@ -10,13 +11,18 @@ func TestImport(t *testing.T) {
 	bano := NewBano(mi)
 	bano.IndexDir(".")
 
-	sizeLoc := bano.Index.(*goloc.Memindex).SizeLocation()
+	sizeLoc := len(mi.Locations)
 	if sizeLoc != 21734 {
 		t.Fail()
 	}
 
-	sizeIndex := bano.Index.(*goloc.Memindex).SizeIndex()
+	sizeIndex := len(mi.Keys)
 	if sizeIndex != 1720 {
+		t.Fail()
+	}
+
+	sizeStopWords := mi.StopWords.GetSize()
+	if sizeStopWords != 16 {
 		t.Fail()
 	}
 
@@ -24,15 +30,20 @@ func TestImport(t *testing.T) {
 }
 
 func TestReload(t *testing.T) {
-	memindex := goloc.NewMemindexFromFile("golocTest.gob")
+	mi := goloc.NewMemindexFromFile("golocTest.gob")
 
-	sizeLoc := memindex.SizeLocation()
+	sizeLoc := len(mi.Locations)
 	if sizeLoc != 21734 {
 		t.Fail()
 	}
 
-	sizeIndex := memindex.SizeIndex()
+	sizeIndex := len(mi.Keys)
 	if sizeIndex != 1720 {
+		t.Fail()
+	}
+
+	sizeStopWords := mi.StopWords.GetSize()
+	if sizeStopWords != 16 {
 		t.Fail()
 	}
 }
