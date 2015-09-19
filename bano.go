@@ -160,7 +160,8 @@ func (b *Bano) IndexFile(filename string) {
 func NewBano(index goloc.Index) *Bano {
 	b := new(Bano)
 	b.Index = index
-	b.AddStopWord("D", "DE", "DU", "DES", "L", "LE", "LA", "LES")
-	b.AddStopWord("RUE", "ROUTE", "ALLEE", "PLACE", "CHEMIN", "IMPASSE", "AVENUE", "BOULEVARD")
+	b.AddStopWord("A", "AU", "AUX", "D", "DE", "DU", "DES", "L", "LE", "LA", "LES", "EN", "ET", "SUR")
+	b.AddStopWord("R", "RU", "RUE", "RT", "RTE", "ROUTE", "AL", "ALLEE", "PL", "PLACE", "CH", "CHE", "CHEMIN", "IMP", "IMPASSE", "AV", "AVENUE", "BD", "BV", "BOULEVARD")
+	b.AddStopWord("ST", "SAINT", "SAINTE")
 	return b
 }

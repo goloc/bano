@@ -21,8 +21,13 @@ func TestImport(t *testing.T) {
 		t.Fail()
 	}
 
-	sizeStopWords := mi.StopWords.GetSize()
-	if sizeStopWords != 16 {
+	sizeStopWords := mi.GetStopWords().Size()
+	if sizeStopWords != 37 {
+		t.Fail()
+	}
+
+	sizeEncodedStopWords := mi.GetEncodedStopWords().Size()
+	if sizeEncodedStopWords != 25 {
 		t.Fail()
 	}
 
@@ -42,8 +47,13 @@ func TestReload(t *testing.T) {
 		t.Fail()
 	}
 
-	sizeStopWords := mi.StopWords.GetSize()
-	if sizeStopWords != 16 {
+	sizeStopWords := mi.GetStopWords().Size()
+	if sizeStopWords != 37 {
+		t.Fail()
+	}
+
+	sizeEncodedStopWords := mi.GetEncodedStopWords().Size()
+	if sizeEncodedStopWords != 25 {
 		t.Fail()
 	}
 }
