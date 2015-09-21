@@ -11,12 +11,12 @@ func TestImport(t *testing.T) {
 	bano := NewBano(mi)
 	bano.IndexDir(".")
 
-	sizeLoc := len(mi.Locations)
+	sizeLoc := mi.Locations.Size()
 	if sizeLoc != 21734 {
 		t.Fail()
 	}
 
-	sizeIndex := len(mi.Keys)
+	sizeIndex := mi.Keys.Size()
 	if sizeIndex != 1720 {
 		t.Fail()
 	}
@@ -37,12 +37,12 @@ func TestImport(t *testing.T) {
 func TestReload(t *testing.T) {
 	mi := goloc.NewMemindexFromFile("golocTest.gob")
 
-	sizeLoc := len(mi.Locations)
+	sizeLoc := mi.Locations.Size()
 	if sizeLoc != 21734 {
 		t.Fail()
 	}
 
-	sizeIndex := len(mi.Keys)
+	sizeIndex := mi.Keys.Size()
 	if sizeIndex != 1720 {
 		t.Fail()
 	}
